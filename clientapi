@@ -8,17 +8,20 @@ function open()
 		if peripheral.isPresent(side[i]) then
 			if (peripheral.getType(side[i]) == "modem") then
 				modem = peripheral.wrap(side[i])
-				if !modem.isWireless()
+				if !modem.isWireless() then
 					modem = nil
+				end
 			end
 		end
 	end
 	assert(modem,"No Wireless Modem Attached")
 	
-	if !modem.isOpen(os.computerID())
+	if !modem.isOpen(os.computerID()) then
 		modem.open(os.computerID())
-	if !modem.isOpen(REDNET_BROADCAST)
+	end
+	if !modem.isOpen(REDNET_BROADCAST) then
 		modem.open(REDNET_BROADCAST)
+	end
 		
 	modem.transmitt(MINENET_JOIN,os.computerID(),"MINENET_JOIN")
 	local bTimeout = false
@@ -29,8 +32,9 @@ function open()
 		local event, modemSide, senderChannel, replyChannel, message, senderDistance = os.pullEvent()
 		if event == "modem_message" then
 			nServers = nServers + 1
-			if (serverDistance == nil)
+			if (serverDistance == nil) then
 				serverDistance = senderDistance
+			end
 			if (serverDistance > senderDistance) then
 				serverDistance = senderDistance
 				connectionChannel = replyChannel
@@ -54,4 +58,9 @@ function open()
 		elseif event == "timer" then
 			bTimeout = true
 		end
-	end	
+	end
+end
+
+function send()
+	
+end
