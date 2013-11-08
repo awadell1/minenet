@@ -14,7 +14,7 @@ function open()
 			end
 		end
 	end
-	assert(modem,"No Wireless Modem Attached")
+	assert(modem,"NO_WIRELESS_MODEM")
 	
 	if !modem.isOpen(os.computerID()) then
 		modem.open(os.computerID())
@@ -26,7 +26,7 @@ function open()
 	modem.transmitt(MINENET_JOIN,os.computerID(),"MINENET_JOIN")
 	local bTimeout = false
 	local timeoutTimer = os.startTimer(5)
-	local connectionChannel
+	local nMinenetChannel
 	local serverDistance = nil
 	while !bTimeout do
 		local event, modemSide, senderChannel, replyChannel, message, senderDistance = os.pullEvent()
@@ -37,23 +37,23 @@ function open()
 			end
 			if (serverDistance > senderDistance) then
 				serverDistance = senderDistance
-				connectionChannel = replyChannel
+				nMinenetChannel = replyChannel
 			end
 		elseif event == "timer" then
 			bTimeout = true
 		end
 	end
-	assert(connectionChannel, "timeout no connection established")
+	assert(nMinenetChannel, "TIMEOUT")
 	bTimeout = false
 	local bConnected = false
 	local errorMessage = nil
 	timeoutTimer = os.startTimer(5)
-	modem.transmitt(connectionChannel,os.computerID(),"ESTABLISH_CONNECTION")
+	modem.transmitt(nMinenetChannel,os.computerID(),"ESTABLISH_CONNECTION")
 	while (!bTimeout & !bConnected) do
 		local event, modemSide, senderChannel, replyChannel, message, senderDistance = os.pullEvent()
-		if (event == "modem_message" & senderChannel == connectionChannel & message == "CONECCTION_ESTABLISHED") then
-			return connectionChannel
-		elseif (event == "modem_message" & senderChannel == connectionChannel) then
+		if (event == "modem_message" & senderChannel == nMinenetChannel & message == "CONECCTION_ESTABLISHED") then
+			return nMinenetChannel
+		elseif (event == "modem_message" & senderChannel == nMinenetChannel) then
 			return nil, message
 		elseif event == "timer" then
 			bTimeout = true
@@ -61,6 +61,35 @@ function open()
 	end
 end
 
-function send()
-	
+function getConnection(TargetComputer,nMinenetChannel)
+	assert(TargetComputer)
+	assert(nMinenetChannel)
+	strServerRequest = textutils.serialize({"REQUEST_ROUTING_TABLE",os.computerID(),TargetComputer})
+	timeoutTimer = os.startTimer(5)
+	modem.transmitt(nMinenetChannel,os.computerID(),ServerRequest)
+	while true do
+		local event, modemSide, senderChannel, replyChannel, message, senderDistance = os.pullEvent()
+		if (event == "modem_message" & senderChannel == nMinenetChannel) then
+			local aServerResponse = untextutils.serialize(message)
+			if (aServerResponse[1] == "ROUTING_SUCCESS") then
+				return table.remove(aServerResponse,1)
+			elseif (aServerResponse[1] == "ROUTING_FAILURE") then
+				error(aServerResponse)
+			end
+		elseif event == "timer" then
+			error("TIMEOUT")
+		end
+	end
 end
+
+function send(nMinenetChannel, RoutingTable, message)
+	assert(nMinenetChannet = tonumber(nMinenetChannet))
+	--Generate Random PacketID
+	math.randomseed(os.time())
+	nPacketID = math.random(65536)
+	nRouteLocation = 1
+	strPacket = textutils.serialize({"REQUEST_SEND_PACKET",RoutingTable,nRouteLocation,nPacketID,message})
+	modem.transmitt(nMinenetChannel,os.computerID(),ServerRequest)
+	return nPacketID
+end
+
