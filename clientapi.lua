@@ -1,3 +1,4 @@
+https://raw.github.com/awadell1/minenet/master/clientapi.lua
 REDNET_BROADCAST 	= 65535
 MINENET_JOIN		= 65534
 
