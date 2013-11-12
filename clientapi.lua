@@ -24,7 +24,7 @@ function open()
 		modem.open(REDNET_BROADCAST)
 	end
 		
-	modem.transmitt(MINENET_JOIN,os.computerID(),"MINENET_JOIN")
+	modem.transmitt(MINENET_JOIN,os.computerID(),"MINENET_JOIN_CLIENT")
 	local bTimeout = false
 	local timeoutTimer = os.startTimer(5)
 	local nMinenetChannel
@@ -85,12 +85,11 @@ end
 
 function send(nMinenetChannel, RoutingTable, message)
 	assert(nMinenetChannet = tonumber(nMinenetChannet))
-	--Generate Random PacketID
-	math.randomseed(os.time())
-	nPacketID = math.random(65536)
-	nRouteLocation = 1
-	strPacket = textutils.serialize({"REQUEST_SEND_PACKET",RoutingTable,nRouteLocation,nPacketID,message})
+	strPacket = textutils.serialize({getPacketID(),"REQUEST_SEND_PACKET",RoutingTable,nRouteLocation),message})
 	modem.transmitt(nMinenetChannel,os.computerID(),ServerRequest)
 	return nPacketID
 end
 
+function getPacketID()
+	return math.random(65536)
+end
